@@ -1,0 +1,38 @@
+#
+# This file contains default values which are used
+# by the salt states deploying your project.
+# you may copy them to your relevant PILLAR file
+# before editing them.
+# If you need to add variables, this is where to begin.
+# Please keep defaults in there, but real passwords
+# must be putted inside pillar
+#
+# replace project_name in your pillar by
+# the current projectname
+# you can also merge parts of this file
+# with the relevant pillar
+makina-states.projectname:
+  data:
+    ui_domain: ui.my.domain.tld
+    domain: my.domain.tld
+    node_ver: '0.10.26'
+    troot: '{project_root}/tilestream'
+    turl: https://github.com/makinacorpus/tilestream.git
+    node: /srv/apps/node/{node_ver}/bin/node
+    npm: /srv/apps/node/{node_ver}/bin/npm
+    tiles: "{data_root}/maps"
+    node_host: '127.0.0.1'
+    ui_port: 3002
+    tile_port: 4002
+    workers: 4
+    nginx_ui_upstreams: salt://makina-projects/{name}/files/nginx.ui_upstreams.conf
+    nginx_upstreams: salt://makina-projects/{name}/files/nginx.upstreams.conf
+    vhost: salt://makina-projects/{name}/files/nginx.conf
+    ui_vhost: salt://makina-projects/{name}/files/nginx_ui.conf
+    json: salt://makina-projects/{name}/files/{name}.json
+    secret: s3cret
+    docroot: '{data_root}/static'
+    htaccess: '{project_root}/.htaccess'
+    users:
+      admin: admin
+# vim:set ft=yaml:
