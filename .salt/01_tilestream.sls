@@ -23,6 +23,7 @@ include:
       'process_name': '{0}.{1}'.format(data.name, loop.index0),
       'user': data.user,
       'directory': odata.troot,
+      'stopsignal': 'KILL',
     })%}
 {% endfor %}
 
