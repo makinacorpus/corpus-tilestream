@@ -1,16 +1,22 @@
-{%- import "makina-states/services/monitoring/circus/macros.jinja" as circus with context %}
+{% import "makina-states/localsettings/nodejs/prefix/prerequisites.sls" as node with context %}
+{% import "makina-states/services/monitoring/circus/macros.jinja" as circus with context %}
 {% import "makina-states/services/http/nginx/init.sls" as nginx %}
 {% set msalt = salt['mc_salt.settings']() %}
 {% set data = opts['ms_project'] %}
 {% set odata = data.data %}
 {% set sdata = salt['mc_utils.json_dump'](odata) %}
 {% set circus_datas = [] %}
-
 {% set shosts = {'a': ''}%}
 {% for host in odata.tile_hosts %}
-{% do shosts.update({'a': '{1} --host="{0}"'.format(
-                     host, shosts['a'])}) %}
-{%endfor %}
+{%  do shosts.update({'a': '{1} --host="{0}"'.format(host, shosts['a'])}) %}
+{% endfor %}
+
+include:
+  - makina-states.localsettings.nodejs
+  - makina-states.services.http.nginx
+  - makina-states.services.monitoring.circus
+
+{{ node.install(odata.node_ver, hash=odata.node_hash) }}
 
 {% for worker in range(odata.workers) %}
 {%  do circus_datas.append({
@@ -36,10 +42,11 @@
     })%}
 {% endfor %}
 
-include:
-  - makina-states.localsettings.nodejs
-  - makina-states.services.http.nginx
-  - makina-states.services.monitoring.circus
+{% for circus_data in circus_datas %}
+{{  circus.circusAddWatcher(
+  "{0}-{1}".format(data.name, loop.index0),
+  **circus_data) }}
+{% endfor %}
 
 {{ nginx.virtualhost(domain=odata.ui_domain,
                      active=True,
@@ -90,10 +97,3 @@ npminstall-{{data.name}}:
     - watch_in:
       - mc_proxy: nginx-pre-restart-hook
       - mc_proxy: circus-pre-restart
-
-{% for circus_data in circus_datas %}
-{{  circus.circusAddWatcher(
-  "{0}-{1}".format(data.name, loop.index0),
-  **circus_data) }}
-{% endfor %}
-
