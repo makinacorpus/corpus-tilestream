@@ -30,8 +30,8 @@ include:
       'shell': "true",
       'cmd': (
            '{0} index.js  '
-            ' --uiPort="{2}" --tilePort="{1}"'
-            ' --tiles="{3}" {4}'
+            ' --uiPort "{2}" --tilePort "{1}"'
+            ' --tiles "{3}" {4}'
       ).format(
         odata.node,
         odata.ui_port + loop.index0,
