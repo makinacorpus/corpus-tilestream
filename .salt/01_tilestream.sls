@@ -5,26 +5,33 @@
 {% set odata = data.data %}
 {% set sdata = salt['mc_utils.json_dump'](odata) %}
 {% set circus_datas = [] %}
+
+{% set shosts = {'a': ''}%}
+{% for host in odata.tile_hosts %}
+{% do shosts.update({'a': '{1} --host="{0}"'.format(
+                     host, shosts['a'])}) %}
+{%endfor %}
+
 {% for worker in range(odata.workers) %}
 {%  do circus_datas.append({
       'uid': data.user,
       'gid': data.group,
+      'copy_env': True,
       'working_dir': odata.troot,
-      'cmd': odata.node,
-      'args': (
-            'index.js '
-            ' --subdomains={4},{5}'
-            ' --accesslog=1'
-            ' --host={0}'
-            ' --uiPort={2} --tilePort={1}'
-            ' --tiles={3}'
+      'warmup_delay': "10",
+      'singleton': "true",
+      'max_age': 24*60*60,
+      'shell': "true",
+      'cmd': (
+           '{0} index.js  '
+            ' --uiPort="{2}" --tilePort="{1}"'
+            ' --tiles="{3}" {4}'
       ).format(
-        odata.node_host,
+        odata.node,
         odata.ui_port + loop.index0,
         odata.tile_port + loop.index0,
         odata.tiles,
-        odata.ui_domain,
-        odata.domain,
+        shosts.a,
       ),
     })%}
 {% endfor %}

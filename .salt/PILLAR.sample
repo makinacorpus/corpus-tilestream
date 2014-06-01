@@ -16,6 +16,7 @@ makina-states.projectname:
     ui_domain: ui.my.domain.tld
     domain: my.domain.tld
     node_ver: '0.10.26'
+    tile_hosts: [ui.my.domain.tld, my.domain.tld]
     troot: '{project_root}/tilestream'
     turl: https://github.com/makinacorpus/tilestream.git
     node: /srv/apps/node/{node_ver}/bin/node
@@ -23,7 +24,7 @@ makina-states.projectname:
     tiles: "{data_root}/maps"
     node_host: '127.0.0.1'
     ui_port: 3002
-    tile_port: 4002
+    tile_port: 3002
     workers: 4
     nginx_ui_upstreams: salt://makina-projects/{name}/files/nginx.ui_upstreams.conf
     nginx_upstreams: salt://makina-projects/{name}/files/nginx.upstreams.conf
