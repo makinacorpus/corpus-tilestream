@@ -1,51 +1,60 @@
 {% import "makina-states/localsettings/nodejs/prefix/prerequisites.sls" as node with context %}
-{% import "makina-states/services/monitoring/circus/macros.jinja" as circus with context %}
+{% import "makina-states/services/monitoring/supervisor/macros.jinja" as supervisor with context %}
 {% import "makina-states/services/http/nginx/init.sls" as nginx %}
 {% set msalt = salt['mc_salt.settings']() %}
 {% set data = opts['ms_project'] %}
 {% set odata = data.data %}
 {% set sdata = salt['mc_utils.json_dump'](odata) %}
-{% set circus_datas = [] %}
+{% set supervisor_datas = [] %}
 {% set shosts = {'a': ''}%}
 {% for host in odata.tile_hosts %}
-{%  do shosts.update({'a': '{1} --host="{0}"'.format(host, shosts['a'])}) %}
+{%  do shosts.update({'a': '{1} --host "{0}"'.format(host, shosts['a'])}) %}
 {% endfor %}
 
 include:
   - makina-states.localsettings.nodejs
   - makina-states.services.http.nginx
-  - makina-states.services.monitoring.circus
+  - makina-states.services.monitoring.supervisor
 
 {{ node.install(odata.node_ver, hash=odata.node_hash) }}
 
 {% for worker in range(odata.workers) %}
-{%  do circus_datas.append({
-      'uid': data.user,
-      'gid': data.group,
-      'copy_env': True,
-      'working_dir': odata.troot,
-      'warmup_delay': "10",
-      'singleton': "true",
-      'max_age': 24*60*60,
-      'shell': "true",
-      'cmd': (
-           '{0} index.js  '
-            ' --uiPort "{2}" --tilePort "{1}"'
-            ' --tiles "{3}" {4}'
-      ).format(
-        odata.node,
-        odata.ui_port + loop.index0,
-        odata.tile_port + loop.index0,
-        odata.tiles,
-        shosts.a,
-      ),
+{%  do supervisor_datas.append({
+      'process_name': '{0}.{1}'.format(data.name, loop.index0),
+      'user': data.user,
+      'directory': odata.troot,
     })%}
 {% endfor %}
 
-{% for circus_data in circus_datas %}
-{{  circus.circusAddWatcher(
+{% for supervisor_data in supervisor_datas %}
+{% set launcher = "{0}/launcher{1}.sh".format(data.project_root, loop.index0) %}
+{% do supervisor_data.update({'command': launcher}) %}
+{{data.name}}-supervisor-exe{{loop.index0}}:
+  file.managed:
+    - name: {{launcher}}
+    - mode: 750
+    - template: jinja
+    - user: {{data.user}}
+    - group: {{data.group}}
+    - watch_in:
+      - mc_proxy: nginx-pre-restart-hook
+      - mc_proxy: supervisor-pre-restart
+    - contents: |
+                #!/usr/bin/env bash
+                cd {{odata.troot}}
+                exec {{ ('{0} index.js'
+                      ' --uiPort "{2}" --tilePort "{1}"'
+                      ' --tiles "{3}" {4}'
+                    ).format(
+                      odata.node,
+                      odata.ui_port + loop.index0,
+                      odata.tile_port + loop.index0,
+                      odata.tiles,
+                      shosts.a,
+                    ).replace('  ', ' ')}}
+{{  supervisor.supervisorAddProgram(
   "{0}-{1}".format(data.name, loop.index0),
-  **circus_data) }}
+  **supervisor_data) }}
 {% endfor %}
 
 {{ nginx.virtualhost(domain=odata.ui_domain,
@@ -96,4 +105,4 @@ npminstall-{{data.name}}:
       - file: {{data.name}}-dirs
     - watch_in:
       - mc_proxy: nginx-pre-restart-hook
-      - mc_proxy: circus-pre-restart
+      - mc_proxy: supervisor-pre-restart

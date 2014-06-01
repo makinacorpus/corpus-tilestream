@@ -22,7 +22,7 @@
               --groups "{{ugs.group}}" \
               --paths "{{cfg.pillar_root}}";
             fi
-            if [-e "{{cfg.project_root}}" ] && [ -e "{{cfg.data_root}}" ];then
+            if [ -e "{{cfg.project_root}}" ] && [ -e "{{cfg.data_root}}" ];then
               "{{locs.resetperms}}" "${@}" \
               --dmode '0770' --fmode '0770'  \
               --paths "{{cfg.project_root}}" \
