@@ -1,7 +1,5 @@
+{% raw %}
 {% set cfg = opts['ms_project'] %}
-# overidden
-# include:
-#   - makina-states.projects.{{cfg['api_version']}}.{{cfg['installer']}}.fixperms
 {# export macro to callees #}
 {% set ugs = salt['mc_usergroup.settings']() %}
 {% set locs = salt['mc_locations.settings']() %}
@@ -22,17 +20,24 @@
               --groups "{{ugs.group}}" \
               --paths "{{cfg.pillar_root}}";
             fi
-            if [ -e "{{cfg.project_root}}" ] && [ -e "{{cfg.data_root}}" ];then
+            if [ -e "{{cfg.project_root}}" ];then
               "{{locs.resetperms}}" "${@}" \
               --dmode '0770' --fmode '0770'  \
               --paths "{{cfg.project_root}}" \
               --paths "{{cfg.data_root}}" \
+              --users www-data \
               --users {% if not cfg.no_user%}{{cfg.user}}{% else -%}root{% endif %} \
-              --users www-data\
-              --groups www-data \
               --groups {{cfg.group}} \
               --user {% if not cfg.no_user%}{{cfg.user}}{% else -%}root{% endif %} \
               --group {{cfg.group}};
+              "{{locs.resetperms}}" "${@}" \
+              --no-recursive -o\
+              --dmode '0555' --fmode '0644'  \
+              --paths "{{cfg.project_root}}" \
+              --paths "{{cfg.project_dir}}" \
+              --paths "{{cfg.project_dir}}"/.. \
+              --paths "{{cfg.project_dir}}"/../.. \
+              --users www-data ;
             fi
   cmd.run:
     - name: {{cfg.project_dir}}/global-reset-perms.sh
@@ -40,3 +45,4 @@
     - user: root
     - watch:
       - file: {{cfg.name}}-restricted-perms
+{% endraw %}
