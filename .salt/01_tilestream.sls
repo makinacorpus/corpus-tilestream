@@ -70,12 +70,12 @@ npminstall-{{cfg.name}}:
 {{ nginx.virtualhost(domain=data.ui_domain,
                      active=True,
                      doc_root=data.docroot,
-                     extra=cfg,
+                     cfg=cfg,
                      vh_top_source=data.nginx_ui_upstreams,
                      vh_content_source=data.ui_vhost) }}
 {{ nginx.virtualhost(domain=data.domain,
                      active=True,
                      doc_root=data.docroot,
-                     extra=cfg,
+                     cfg=cfg,
                      vh_top_source=data.nginx_upstreams,
                      vh_content_source=data.vhost) }}
