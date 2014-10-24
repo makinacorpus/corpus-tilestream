@@ -49,6 +49,12 @@ npminstall-{{cfg.name}}:
       - mc_proxy: nginx-pre-restart-hook
       - mc_proxy: circus-pre-restart
 
+{% for i in data.server_aliases %}
+{%  if i not in data.tile_hosts%}
+{%    do data.tile_hosts.append(i) %}
+{%  endif %}
+{% endfor %}
+
 {% for worker in range(data.workers) %}
 {% set circus_data = {
      'cmd':  (
@@ -77,5 +83,7 @@ npminstall-{{cfg.name}}:
                      active=True,
                      doc_root=data.docroot,
                      cfg=cfg,
+                     server_aliases=data.server_aliases,
+                     redirect_aliases=False,
                      vh_top_source=data.nginx_upstreams,
                      vh_content_source=data.vhost) }}

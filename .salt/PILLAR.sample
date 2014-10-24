@@ -15,6 +15,7 @@ makina-states.projectname:
   data:
     ui_domain: ui.my.domain.tld
     domain: my.domain.tld
+    server_aliases: []
     node_ver: '0.10.28'
     node_hash: '4b9cf9437decea3d9913b694ea2e9b0a06ced2dd'
     tile_hosts: [ui.my.domain.tld, my.domain.tld]
