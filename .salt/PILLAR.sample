@@ -23,7 +23,7 @@ makina-states.projectname:
     turl: https://github.com/makinacorpus/tilestream.git
     node: /srv/apps/node/{node_ver}/bin/node
     npm: /srv/apps/node/{node_ver}/bin/npm
-    tiles: "{data_root}/maps"
+    tiles: "{ftp_root}"
     node_host: '127.0.0.1'
     ui_port: 3002
     tile_port: 3002
@@ -36,6 +36,11 @@ makina-states.projectname:
     secret: s3cret
     docroot: '{data_root}/static'
     htaccess: '{project_root}/.htaccess'
-    users:
-      admin: admin
+    rftp_root: "/srv/ftp"
+    ftp_root: "{rftp_root}/{name}"
+    password: secret
+    cron_periodicity: "*/10 * * * *"
+    #users:
+    #  - admin: {password: "{password}"}
+    #  - uploader: {password: "{password}", home: "{ftp_root}/uploader"}
 # vim:set ft=yaml:
