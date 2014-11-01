@@ -50,7 +50,7 @@
                            'user': cfg.user, 'group': cfg.group, 'mode': '0771',
                            'users': [cfg.user, 'www-data'], 'groups': [cfg.group, 'www-data']}))) %}
             setfacl  -b -R "{{data.ftp_root}}"
-            {% for userdef in cfg.data.users%}{% for usr, udata in userdef.items() %}
+            {% for userdef in cfg.data.get('users', [])%}{% for usr, udata in userdef.items() %}
               {%    set uhome = udata.get('home', data.ftp_root) %}
               {%    set ftp_directory = ftp_directories.setdefault(
                        uhome, {'user': usr, 'group': usr, 'mode': '0771',

@@ -27,9 +27,11 @@ prepreqs-{{cfg.name}}:
 
 {{cfg.name}}-dirs:
   file.directory:
-    - pkg: prepreqs-{{cfg.name}}
     - watch:
+      - pkg: prepreqs-{{cfg.name}}
       - git: {{cfg.name}}-pull
+    - mode: 751
+    - makedirs: true
     - names:
       - {{data.tiles}}
       - {{data.docroot}}
