@@ -2,6 +2,7 @@
 include:
   - makina-states.services.ftp.pureftpd
 {% set apacheSettings = salt['mc_apache.settings']() %}
+{% set data = cfg.data %}
 
 {{cfg.name}}-bindmounted-ftp:
   file.directory:
@@ -43,3 +44,20 @@ include:
       - user: {{cfg.name}}-ftp-user-{{user}}
 {% endfor %}
 {% endfor %}
+
+{% if data.get('ftp_port_range', '') %}
+/etc/pure-ftpd/conf/PassivePortRange:
+  file.managed:
+    - makedirs: true
+    - contents: {{data.ftp_port_range}}
+    - watch_in:
+      - mc_proxy: ftpd-post-configuration-hook
+{%endif%}
+{% if data.get('ftp_ip', '') %}
+/etc/pure-ftpd/conf/ForcePassiveIP:
+  file.managed:
+    - makedirs: true
+    - contents: {{data.ftp_ip}}
+    - watch_in:
+      - mc_proxy: ftpd-post-configuration-hook
+{% endif %}

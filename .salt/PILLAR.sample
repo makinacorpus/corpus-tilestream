@@ -40,6 +40,8 @@ makina-states.projectname:
     ftp_root: "{rftp_root}/{name}"
     password: secret
     cron_periodicity: "*/10 * * * *"
+    #ftp_port_range: "22000 22100"
+    #ftp_ip: 178.33.47.236
     #users:
     #  - admin: {password: "{password}"}
     #  - uploader: {password: "{password}", home: "{ftp_root}/uploader"}
