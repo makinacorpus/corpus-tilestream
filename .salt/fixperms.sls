@@ -4,6 +4,8 @@
 {% set ugs = salt['mc_usergroup.settings']() %}
 {% set locs = salt['mc_locations.settings']() %}
 {% set cfg = opts['ms_project'] %}
+
+{% set admins = [] %}
 {{cfg.name}}-restricted-perms:
   file.managed:
     - name: {{cfg.project_dir}}/global-reset-perms.sh
@@ -55,6 +57,9 @@
               {%    set ftp_directory = ftp_directories.setdefault(
                        uhome, {'user': usr, 'group': usr, 'mode': '0771',
                                'users': [ cfg.user, 'www-data'], 'groups': [cfg.group, 'www-data']}) %}
+              {% if uhome == data.ftp_root%}
+              {%  do admins.append(usr)%}
+              {% endif%}
               {% if not usr in ftp_directory.users%}{% do ftp_directory.users.append(usr) %}{%endif%}
             {% endfor%}{% endfor %}
             {% for ftp_directory, d in ftp_directories.items() %}
@@ -62,6 +67,7 @@
               -u {{d.user}} -g {{d.group}} --dmode "{{d.mode}}" --fmode "{{d.mode}}"\
               {% for usr in d.users%}--users {{usr}}:rwx {%endfor%}\
               {% for grp in d.groups%}--groups {{grp}}:rwx {%endfor%}\
+              --groups www-data:r-x\
               --paths "{{ftp_directory}}"
             {% endfor %}
             # symlink all mapfiles in subfolders
@@ -75,6 +81,15 @@
               if [ ! -e "$(readlink "${i}")" ];then
                 rm -fv "${i}"
               fi
+            done
+            # first level files
+            find -L -mindepth 0 -maxdepth 1 -type f \( ! -regex '.*/\..*' \)|while read i;do
+              {{locs.resetperms}} -q --no-recursive\
+                -u {{cfg.user}} -g {{cfg.group}} --dmode "771" --fmode "644"\
+                {% for usr in [cfg.user] + admins %}--users {{usr}}:rwx {%endfor%}\
+                {% for grp in [cfg.group]%}--groups {{grp}}:rwx {%endfor%}\
+                --groups www-data:r-x\
+                --paths "$i"
             done
             fi
   cmd.run:

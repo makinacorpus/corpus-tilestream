@@ -1,13 +1,11 @@
 {% import "makina-states/localsettings/nodejs/prefix/prerequisites.sls" as node with context %}
 {% import "makina-states/services/monitoring/circus/macros.jinja" as circus  with context %}
-{% import "makina-states/services/http/nginx/init.sls" as nginx %}
 {% set cfg = opts['ms_project'] %}
 {% set data = cfg.data %}
 {% set scfg = salt['mc_utils.json_dump'](cfg) %}
 
 include:
   - makina-states.localsettings.nodejs
-  - makina-states.services.http.nginx
   - makina-states.services.monitoring.circus
 
 prepreqs-{{cfg.name}}:
@@ -48,7 +46,6 @@ npminstall-{{cfg.name}}:
     - watch:
       - file: {{cfg.name}}-dirs
     - watch_in:
-      - mc_proxy: nginx-pre-restart-hook
       - mc_proxy: circus-pre-restart
 
 {% for i in data.server_aliases %}
@@ -74,18 +71,3 @@ npminstall-{{cfg.name}}:
       'max_age': 24*60*60} %}
 {{ circus.circusAddWatcher("{0}-{1}".format(cfg.name, loop.index0), **circus_data) }}
 {% endfor %}
-
-{{ nginx.virtualhost(domain=data.ui_domain,
-                     active=True,
-                     doc_root=data.docroot,
-                     cfg=cfg,
-                     vh_top_source=data.nginx_ui_upstreams,
-                     vh_content_source=data.ui_vhost) }}
-{{ nginx.virtualhost(domain=data.domain,
-                     active=True,
-                     doc_root=data.docroot,
-                     cfg=cfg,
-                     server_aliases=data.server_aliases,
-                     redirect_aliases=False,
-                     vh_top_source=data.nginx_upstreams,
-                     vh_content_source=data.vhost) }}

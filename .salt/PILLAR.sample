@@ -34,6 +34,7 @@ makina-states.projectname:
     ui_vhost: salt://makina-projects/{name}/files/nginx_ui.conf
     json: salt://makina-projects/{name}/files/{name}.json
     secret: s3cret
+    htpasswd: "/etc/{name}.htpasswd"
     docroot: '{data_root}/static'
     htaccess: '{project_root}/.htaccess'
     rftp_root: "/srv/ftp"
@@ -43,6 +44,13 @@ makina-states.projectname:
     #ftp_port_range: "22000 22100"
     #ftp_ip: 178.33.47.236
     #users:
-    #  - admin: {password: "{password}"}
+    #  - tadmin: {password: "{password}"}
     #  - uploader: {password: "{password}", home: "{ftp_root}/uploader"}
-# vim:set ft=yaml:
+    http_downloads:
+      - /downloads:
+          path: "{ftp_root}"
+          users: [tadmin]
+      - /downloads/test.mbtiles:
+          path: "{ftp_root}/test.mbtiles"
+          users: [uploader]
+# vim:set ft=sls:
