@@ -74,12 +74,12 @@
             cd {{data.ftp_root}}
             find -L -mindepth 2 -xtype f \( ! -regex '.*/\..*' \)|while read i;do
               target=$(echo "${i}"|sed "s:^./::g"|sed "s/\//-_-/g")
-              ln -fvs "{{data.ftp_root}}/${i}" "${target}"
+              ln -fs "{{data.ftp_root}}/${i}" "${target}"
             done
             # cleanup orphaned symlink
             find -L -mindepth 0 -maxdepth 1 -xtype l \( ! -regex '.*/\..*' \)|while read i;do
               if [ ! -e "$(readlink "${i}")" ];then
-                rm -fv "${i}"
+                rm -f "${i}"
               fi
             done
             # first level files
