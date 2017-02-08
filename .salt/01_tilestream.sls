@@ -50,7 +50,7 @@ npminstall-{{cfg.name}}:
 npminstall-{{cfg.name}}-patch:
   cmd.run:
     - name: |
-            sed -i -re  "s/(#?if.* throw err;)/\/\/\1/g" node_modules/bones/server/plugin.js
+            sed -i -re  "s/(\s+if.* throw err;)/\/\/\1/g" node_modules/bones/server/plugin.js
     - cwd: {{data.troot}}
     - user: {{cfg.user}}
     - watch:
