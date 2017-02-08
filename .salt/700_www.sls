@@ -5,16 +5,11 @@
 include:
   - makina-states.services.http.nginx
 
-echo restart:
-  cmd.run:
-    - user: {{cfg.user}}
-    - watch_in:
-      - mc_proxy: nginx-pre-restart-hook
-
 {{ nginx.virtualhost(domain=data.ui_domain,
                      active=True,
                      doc_root=data.docroot,
                      cfg=cfg,
+                     force_restart=True,
                      vh_top_source=data.nginx_ui_upstreams,
                      vh_content_source=data.ui_vhost) }}
 
@@ -22,6 +17,7 @@ echo restart:
                      active=True,
                      doc_root=data.docroot,
                      cfg=cfg,
+                     force_restart=True,
                      server_aliases=data.server_aliases,
                      redirect_aliases=False,
                      vh_top_source=data.nginx_upstreams,

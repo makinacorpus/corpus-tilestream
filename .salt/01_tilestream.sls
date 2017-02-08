@@ -47,6 +47,17 @@ npminstall-{{cfg.name}}:
       - file: {{cfg.name}}-dirs
     - watch_in:
       - mc_proxy: circus-pre-restart
+npminstall-{{cfg.name}}-patch:
+  cmd.run:
+    - name: |
+            sed -i -re  "s/(#?if.* throw err;)/\/\/\1/g" node_modules/bones/server/plugin.js
+    - cwd: {{data.troot}}
+    - user: {{cfg.user}}
+    - watch:
+      - file: {{cfg.name}}-dirs
+      - cmd: npminstall-{{cfg.name}}
+    - watch_in:
+      - mc_proxy: circus-pre-restart
 
 {% for i in data.server_aliases %}
 {%  if i not in data.tile_hosts%}
